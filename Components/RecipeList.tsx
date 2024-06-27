@@ -20,8 +20,14 @@ const RecipeList: FC<{ route: any; navigation: any; data: Recipe[] }> = ({
                 <Post
                     id={item._id}
                     title={item.title}
-                    owner={item.owner}
-                    img={item.imgUrl}
+                    owner={item.ownerName}
+                    imgs={
+                        Array.isArray(item.images) && item.images.length > 0
+                            ? item.images
+                            : [
+                                  "https://i.vimeocdn.com/portrait/58832_300x300.jpg",
+                              ]
+                    }
                     onItemSelected={onItemSelected}
                 />
             )}

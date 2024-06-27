@@ -36,11 +36,12 @@ const createPost = async (
         ingredients: string[];
         description: string;
         steps: string[];
+        images: string[];
+        ownerName: string;
     }
 ) => {
     apiClient.setHeader("Authorization", "Bearer " + user.accessToken);
     const response = await apiClient.post<{}>("/post/", { post, user });
-    console.log(response);
     return response;
 };
 

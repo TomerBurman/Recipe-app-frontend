@@ -1,7 +1,18 @@
-import React, { FC, useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, Alert } from "react-native";
+import React, { FC, useState, useEffect } from "react";
+import {
+    View,
+    TextInput,
+    Button,
+    StyleSheet,
+    Text,
+    Alert,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import UserAPI from "../api/UserAPI"; // Make sure to implement the appropriate API call in your UserAPI
+import * as ImagePicker from "expo-image-picker";
+import { createPost, User } from "../Models/UserModel";
 
 const CreatePost: FC<{ route: any; navigation: any }> = ({
     route,
@@ -11,8 +22,43 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
     const [ingredients, setIngredients] = useState("");
     const [description, setDescription] = useState("");
     const [steps, setSteps] = useState("");
-    const [imgUrl, setImgUrl] = useState("https://localhost:300");
-    const user = route.params;
+    const [images, setImages] = useState<string[]>([]);
+    const user: User = route.params.user;
+
+    const askPermission = async () => {
+        try {
+            const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!res.granted) {
+                alert("You need to accept camera roll permissions");
+            }
+        } catch (err) {
+            console.log("Permission error: " + err);
+        }
+    };
+
+    useEffect(() => {
+        askPermission();
+    }, []);
+
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsMultipleSelection: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
+
+            if (!result.canceled) {
+                const newImages = result.assets.map((asset) => asset.uri);
+                setImages([...images, ...newImages]);
+            } else {
+                Alert.alert("You need to adjust permissions");
+            }
+        } catch (err) {
+            console.error("Image picking error: ", err);
+        }
+    };
 
     const handleCreatePost = async () => {
         const post = {
@@ -22,12 +68,17 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
                 .map((ingredient) => ingredient.trim()), // Convert comma-separated string to array
             description,
             steps: steps.split(".").map((step) => step.trim()), // Convert period-separated string to array
+            images, // Use the images array
+            ownerName: user.name,
         };
 
         try {
-            const res = await UserAPI.createPost(user, post);
+            console.log(typeof user);
+            console.log(user);
+            const res = await createPost(user, post);
             if (res && res.status === 201) {
                 Alert.alert("Post created successfully");
+                console.log(res);
                 navigation.goBack(); // Navigate back to the previous screen
             } else {
                 Alert.alert("Error creating post, please try again");
@@ -39,7 +90,7 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Create a New Recipe</Text>
             <TextInput
                 style={styles.input}
@@ -65,8 +116,14 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
                 value={steps}
                 onChangeText={setSteps}
             />
+            <Button title="Pick images from camera roll" onPress={pickImage} />
+            <View style={styles.imageContainer}>
+                {images.map((uri, index) => (
+                    <Image key={index} source={{ uri }} style={styles.image} />
+                ))}
+            </View>
             <Button title="Create Post" onPress={handleCreatePost} />
-        </View>
+        </ScrollView>
     );
 };
 
@@ -87,6 +144,16 @@ const styles = StyleSheet.create({
         padding: 10,
         marginBottom: 10,
         borderRadius: 5,
+    },
+    imageContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        marginVertical: 10,
+    },
+    image: {
+        width: 100,
+        height: 100,
+        margin: 5,
     },
 });
 

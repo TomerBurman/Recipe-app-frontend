@@ -5,23 +5,36 @@ import {
     Image,
     Text,
     StyleSheet,
+    ScrollView,
 } from "react-native";
 
 const Post: FC<{
     id: string;
     title: string;
-    img: string;
     owner: string;
+    imgs: string[];
     onItemSelected: (id: string) => void;
-}> = ({ title, img, owner, id, onItemSelected }) => {
+}> = ({ title, imgs, owner, id, onItemSelected }) => {
     const onPress = () => {
-        console.log("Row pressed");
         onItemSelected(id);
     };
+
     return (
         <TouchableHighlight onPress={onPress} underlayColor={"grey"}>
             <View style={styles.listrow}>
-                <Image style={styles.image} source={{ uri: img }} />
+                <ScrollView horizontal>
+                    {imgs && imgs.length > 0 ? (
+                        imgs.map((img, index) => (
+                            <Image
+                                key={index}
+                                source={{ uri: img }}
+                                style={styles.image}
+                            />
+                        ))
+                    ) : (
+                        <View style={styles.placeholder} />
+                    )}
+                </ScrollView>
                 <View style={styles.info}>
                     <Text style={styles.title}>{title}</Text>
                     <Text style={styles.owner}>{owner}</Text>
@@ -47,10 +60,17 @@ const styles = StyleSheet.create({
         alignItems: "center", // Center text horizontally
         flex: 1, // Ensure it takes up remaining space
     },
-    image: {
-        height: 100,
+    placeholder: {
         width: 100,
-        marginRight: 10, // Add some space between image and text
+        height: 100,
+        marginRight: 10,
+        backgroundColor: "#ccc",
+    },
+    image: {
+        height: 50,
+        width: 50,
+        marginRight: 5, // Add some space between images
+        borderRadius: 50,
     },
     title: {
         marginBottom: 5,

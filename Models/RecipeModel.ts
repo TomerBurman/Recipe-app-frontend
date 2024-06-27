@@ -7,7 +7,8 @@ export type Recipe = {
     description: string;
     ingredients: string[];
     steps: string[];
-    imgUrl: string;
+    images: string[];
+    ownerName: string;
 };
 
 // title: string;

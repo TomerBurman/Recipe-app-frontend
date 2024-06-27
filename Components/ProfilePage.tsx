@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from "react";
-import { getAllStudents } from "../Models/StudentModel";
 import { FlatList, StyleSheet, Text, Alert, Image, View } from "react-native";
 import { User, setUser } from "../Models/UserModel";
 

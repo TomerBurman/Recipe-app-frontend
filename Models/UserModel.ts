@@ -44,3 +44,21 @@ export const getAllPosts = async (user: {
         return [];
     }
 };
+
+export const createPost = async (
+    connectedUser: User,
+    post: {
+        title: string;
+        ingredients: string[];
+        description: string;
+        steps: string[];
+        images: string[];
+        ownerName: string;
+    }
+) => {
+    const user = {
+        _id: connectedUser.userId,
+        accessToken: connectedUser.tokens[0],
+    };
+    return await UserAPI.createPost(user, post);
+};

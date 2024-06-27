@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useCallback } from "react";
 import {
     StyleSheet,
     Text,
@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Button,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { User, setUser, getAllPosts } from "../Models/UserModel";
 import { Recipe } from "../Models/RecipeModel";
 import RecipeList from "./RecipeList";
@@ -19,6 +20,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     const [data, setData] = useState<User | null>(null);
     const [selectedTab, setSelectedTab] = useState<string>("Explore");
     const { name, userId, refreshToken, accessToken, email } = route.params;
+
     useEffect(() => {
         const initializeData = () => {
             const userData = setUser({
@@ -34,35 +36,40 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
         initializeData();
     }, [name, userId, refreshToken, accessToken, email]);
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            if (data) {
-                try {
-                    const postsData: Recipe[] = await getAllPosts({
-                        refreshToken: data.tokens[1],
-                        accessToken: data.tokens[0],
-                    });
-                    setPosts(postsData);
-                } catch (error) {
-                    console.log("Error fetching posts: ", error);
-                }
+    const fetchPosts = useCallback(async () => {
+        if (data) {
+            try {
+                const postsData: Recipe[] = await getAllPosts({
+                    refreshToken: data.tokens[1],
+                    accessToken: data.tokens[0],
+                });
+                setPosts(postsData);
+            } catch (error) {
+                console.log("Error fetching posts: ", error);
             }
-        };
+        }
+    }, [data]);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchPosts();
+        }, [fetchPosts])
+    );
+
+    useEffect(() => {
         navigation.setOptions({
             headerRight: () => (
                 <Button
                     onPress={() => {
                         navigation.navigate("New post", {
-                            userId: data?.userId,
-                            accessToken: data?.tokens[0],
+                            user: data,
                         });
                     }}
                     title="Post recipe"
                 />
             ),
         });
-        fetchPosts();
-    }, [data]);
+    }, [data, navigation]);
 
     if (!data || !posts) {
         return <Text>Loading...</Text>;
