@@ -23,10 +23,7 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
 
     return (
         <View style={styles.container}>
-            <Image
-                source={require("../assets/icon.png")}
-                style={styles.profileImage}
-            />
+            <Image source={{ uri: data.image }} style={styles.profileImage} />
             <Text style={styles.name}>{data.name}</Text>
             <Text style={styles.email}>{data.email}</Text>
             <Text style={styles.bio}>{data.bio}</Text>

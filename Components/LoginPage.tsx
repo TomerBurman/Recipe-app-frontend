@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
 } from "react-native";
 import UserAPI from "../api/UserAPI";
+import { login } from "../Models/UserModel";
 
 const LoginPage: FC<{ navigation: any; route: any }> = ({
     navigation,
@@ -19,9 +20,9 @@ const LoginPage: FC<{ navigation: any; route: any }> = ({
 
     const handleLogin = async () => {
         try {
-            const response = await UserAPI.login({ email, password });
+            const response = await login({ email, password });
             if (response.ok && response.data) {
-                const { accessToken, refreshToken, name, userId } =
+                const { accessToken, refreshToken, name, userId, image, bio } =
                     response.data;
                 // Save tokens or perform any necessary action
                 console.log("User Name:", email);
@@ -31,6 +32,8 @@ const LoginPage: FC<{ navigation: any; route: any }> = ({
                     refreshToken,
                     accessToken,
                     email,
+                    image,
+                    bio,
                 });
             } else {
                 Alert.alert("Login failed. Please try again.");

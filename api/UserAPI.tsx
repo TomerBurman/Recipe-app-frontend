@@ -6,6 +6,7 @@ const register = async (user: {
     password: string;
     name: string;
     bio: string;
+    image: string;
 }) => {
     console.log("Registering with details: " + user.email);
     try {
@@ -14,19 +15,36 @@ const register = async (user: {
             password: string;
             name: string;
             bio: string;
+            image: string;
             tokens: string[];
         }>("/auth/register", user);
     } catch (err) {
         console.log(err);
     }
 };
+
+const getUser = async (user: { userId: string; accessToken: string }) => {
+    apiClient.setHeader("Authorization", "Bearer " + user.accessToken);
+    const res = apiClient.get<{
+        email: string;
+        tokens: string[];
+        image: string;
+        bio: string;
+        id: string;
+        name: string;
+    }>("/user/" + user.userId);
+    return res;
+};
 const login = async (user: { email: string; password: string }) => {
-    return apiClient.post<{
+    const res = await apiClient.post<{
         accessToken: string;
         refreshToken: string;
         name: string;
         userId: string;
+        image: string;
+        bio: string;
     }>("/auth/login", user);
+    return res;
 };
 
 const createPost = async (
@@ -50,6 +68,7 @@ const getAllPosts = async (user: {
     accessToken: string;
 }): Promise<any> => {
     try {
+        console.log(user.accessToken, user.refreshToken);
         apiClient.setHeader("Authorization", "Bearer " + user.accessToken);
         const response = await apiClient.get<{
             data: Recipe[];
@@ -71,4 +90,5 @@ export default {
     login,
     createPost,
     getAllPosts,
+    getUser,
 };

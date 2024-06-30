@@ -20,9 +20,9 @@ const Post: FC<{
     };
 
     return (
-        <TouchableHighlight onPress={onPress} underlayColor={"grey"}>
+        <TouchableHighlight onPress={onPress} underlayColor={"#f0f0f0"}>
             <View style={styles.listrow}>
-                <ScrollView horizontal>
+                <ScrollView horizontal style={styles.imageScroll}>
                     {imgs && imgs.length > 0 ? (
                         imgs.map((img, index) => (
                             <Image
@@ -37,7 +37,7 @@ const Post: FC<{
                 </ScrollView>
                 <View style={styles.info}>
                     <Text style={styles.title}>{title}</Text>
-                    <Text style={styles.owner}>{owner}</Text>
+                    <Text style={styles.owner}>by {owner}</Text>
                 </View>
             </View>
         </TouchableHighlight>
@@ -46,40 +46,46 @@ const Post: FC<{
 
 const styles = StyleSheet.create({
     listrow: {
-        marginHorizontal: 5,
-        flexDirection: "row",
-        elevation: 1,
-        borderRadius: 2,
-        justifyContent: "center",
-        alignItems: "center", // Center items vertically
-        padding: 10,
-    },
-    info: {
+        marginVertical: 10,
+        marginHorizontal: 15,
+        padding: 15,
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
         flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center", // Center text horizontally
-        flex: 1, // Ensure it takes up remaining space
+    },
+    imageScroll: {
+        marginBottom: 15,
     },
     placeholder: {
         width: 100,
         height: 100,
         marginRight: 10,
         backgroundColor: "#ccc",
+        borderRadius: 10,
     },
     image: {
-        height: 50,
-        width: 50,
-        marginRight: 5, // Add some space between images
-        borderRadius: 50,
+        height: 90,
+        width: 90,
+        borderRadius: 10,
+        marginRight: 10,
+    },
+    info: {
+        flexDirection: "column",
+        alignItems: "center",
     },
     title: {
         marginBottom: 5,
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "bold",
         textAlign: "center",
     },
     owner: {
-        fontSize: 16,
+        fontSize: 14,
+        color: "#666",
         textAlign: "center",
     },
 });

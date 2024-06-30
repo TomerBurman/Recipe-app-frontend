@@ -41,6 +41,11 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
     }, []);
 
     const pickImage = async () => {
+        if (images.length >= 3) {
+            Alert.alert("You can only upload up to 3 images.");
+            return;
+        }
+
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -51,7 +56,10 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
 
             if (!result.canceled) {
                 const newImages = result.assets.map((asset) => asset.uri);
-                setImages([...images, ...newImages]);
+                setImages((prevImages) => [
+                    ...prevImages,
+                    ...newImages.slice(0, 3 - prevImages.length), // Limit to 3 images
+                ]);
             } else {
                 Alert.alert("You need to adjust permissions");
             }
@@ -73,8 +81,6 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
         };
 
         try {
-            console.log(typeof user);
-            console.log(user);
             const res = await createPost(user, post);
             if (res && res.status === 201) {
                 Alert.alert("Post created successfully");
@@ -154,6 +160,7 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         margin: 5,
+        borderRadius: 10,
     },
 });
 

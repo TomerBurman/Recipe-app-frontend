@@ -19,7 +19,8 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     const [posts, setPosts] = useState<Recipe[] | null>(null);
     const [data, setData] = useState<User | null>(null);
     const [selectedTab, setSelectedTab] = useState<string>("Explore");
-    const { name, userId, refreshToken, accessToken, email } = route.params;
+    const { name, userId, refreshToken, accessToken, email, image } =
+        route.params;
 
     useEffect(() => {
         const initializeData = () => {
@@ -29,15 +30,16 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                 refreshToken,
                 accessToken,
                 email,
+                image,
             });
             setData(userData);
         };
 
         initializeData();
-    }, [name, userId, refreshToken, accessToken, email]);
+    }, [name, userId, refreshToken, accessToken, email, image]);
 
     const fetchPosts = useCallback(async () => {
-        if (data) {
+        if (data?.tokens) {
             try {
                 const postsData: Recipe[] = await getAllPosts({
                     refreshToken: data.tokens[1],
@@ -58,6 +60,23 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
 
     useEffect(() => {
         navigation.setOptions({
+            headerLeft: () => (
+                <View style={styles.headerLeftContainer}>
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate("Profile", { user: data })
+                        }
+                    >
+                        {data?.image && (
+                            <Image
+                                source={{ uri: data.image }}
+                                style={styles.navProfileImage}
+                            />
+                        )}
+                    </TouchableOpacity>
+                </View>
+            ),
+            title: "Welcome " + data?.name,
             headerRight: () => (
                 <Button
                     onPress={() => {
@@ -91,15 +110,6 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() => navigation.navigate("Profile", { user: data })}
-            >
-                <Image
-                    source={require("../assets/icon.png")}
-                    style={styles.profileImage}
-                />
-            </TouchableOpacity>
-            <Text style={styles.welcomeMessage}>Welcome, {data.name}!</Text>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={[
@@ -130,6 +140,17 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         padding: 20,
+    },
+    headerLeftContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginLeft: 10,
+    },
+    navProfileImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
     },
     profileImage: {
         width: 100,
