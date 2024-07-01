@@ -8,11 +8,10 @@ import {
     Alert,
     Image,
     ScrollView,
-    TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import { createPost, User } from "../Models/UserModel";
+import { createPost, User, uploadImage } from "../Models/UserModel"; // Import uploadImage
 
 const CreatePost: FC<{ route: any; navigation: any }> = ({
     route,
@@ -69,6 +68,13 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
     };
 
     const handleCreatePost = async () => {
+        const uploadedImages = await Promise.all(
+            images.map(async (imageURI) => {
+                const url = await uploadImage(imageURI);
+                return url;
+            })
+        );
+
         const post = {
             title,
             ingredients: ingredients
@@ -76,7 +82,7 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
                 .map((ingredient) => ingredient.trim()), // Convert comma-separated string to array
             description,
             steps: steps.split(".").map((step) => step.trim()), // Convert period-separated string to array
-            images, // Use the images array
+            images: uploadedImages, // Use the uploaded images array
             ownerName: user.name,
         };
 
@@ -84,7 +90,6 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
             const res = await createPost(user, post);
             if (res && res.status === 201) {
                 Alert.alert("Post created successfully");
-                console.log(res);
                 navigation.goBack(); // Navigate back to the previous screen
             } else {
                 Alert.alert("Error creating post, please try again");

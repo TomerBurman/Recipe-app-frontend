@@ -25,7 +25,6 @@ const LoginPage: FC<{ navigation: any; route: any }> = ({
                 const { accessToken, refreshToken, name, userId, image, bio } =
                     response.data;
                 // Save tokens or perform any necessary action
-                console.log("User Name:", email);
                 navigation.navigate("HomePage", {
                     name,
                     userId,

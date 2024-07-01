@@ -13,7 +13,8 @@ import UserAPI from "../api/UserAPI";
 import { User, register } from "../Models/UserModel";
 import * as ImagePicker from "expo-image-picker";
 import { AntDesign } from "@expo/vector-icons";
-import { login } from "../Models/UserModel";
+import { login, uploadImage } from "../Models/UserModel";
+import { ActivityIndicator } from "./ActivityIndicator";
 
 const RegistrationPage: FC<{ navigation: any; route: any }> = ({
     navigation,
@@ -25,6 +26,7 @@ const RegistrationPage: FC<{ navigation: any; route: any }> = ({
     const [bio, setBio] = useState("");
     const [image, setImage] = useState("");
     const [tokens, setTokens] = useState<Array<String>>([]);
+    const [loading, setLoading] = useState(false);
 
     const askPermission = async () => {
         try {
@@ -63,7 +65,12 @@ const RegistrationPage: FC<{ navigation: any; route: any }> = ({
         }
     };
     const handleRegister = async () => {
+        setLoading(true);
         try {
+            if (image != "") {
+                const url = await uploadImage(image);
+                setImage(url);
+            }
             const res = await register({ email, password, name, bio, image });
             if (res && res.status == 200) {
                 try {
@@ -81,8 +88,6 @@ const RegistrationPage: FC<{ navigation: any; route: any }> = ({
                             refreshToken: res2.data.refreshToken,
                             image: image,
                         });
-                        console.log(refreshToken + " This is access token");
-                        console.log(accessToken + " This is refresh token");
                     }
                 } catch (err) {
                     Alert.alert("Error logging in");
@@ -92,65 +97,75 @@ const RegistrationPage: FC<{ navigation: any; route: any }> = ({
             }
         } catch (err) {
             Alert.alert("Error registering, make sure all fields are valid");
+        } finally {
+            setLoading(false); // Hide activity indicator
         }
     };
 
     return (
         <View style={styles.container}>
-            <View>
-                {image == "" && (
-                    <Image
-                        source={require("../assets/icon.png")}
-                        style={styles.image}
+            {loading && <ActivityIndicator visible={loading} />}
+            {!loading && (
+                <>
+                    <View>
+                        {image == "" && (
+                            <Image
+                                source={require("../assets/icon.png")}
+                                style={styles.image}
+                            />
+                        )}
+                        {image != "" && (
+                            <Image
+                                source={{ uri: image }}
+                                style={styles.image}
+                            />
+                        )}
+                        <TouchableOpacity onPress={openCamera}>
+                            <AntDesign
+                                name="camera"
+                                size={24}
+                                color="black"
+                                style={styles.addImageIcon}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={openGallery}>
+                            <AntDesign
+                                name="picture"
+                                size={24}
+                                color="black"
+                                style={styles.galleryIcon}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Name"
+                        value={name}
+                        onChangeText={setName}
                     />
-                )}
-                {image != "" && (
-                    <Image source={{ uri: image }} style={styles.image} />
-                )}
-                <TouchableOpacity onPress={openCamera}>
-                    <AntDesign
-                        name="camera"
-                        size={24}
-                        color="black"
-                        style={styles.addImageIcon}
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
                     />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={openGallery}>
-                    <AntDesign
-                        name="picture"
-                        size={24}
-                        color="black"
-                        style={styles.galleryIcon}
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Password"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
                     />
-                </TouchableOpacity>
-            </View>
-            <TextInput
-                style={styles.input}
-                placeholder="Name"
-                value={name}
-                onChangeText={setName}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Bio"
-                value={bio}
-                onChangeText={setBio}
-            />
-            <Button title="Register" onPress={handleRegister} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Bio"
+                        value={bio}
+                        onChangeText={setBio}
+                    />
+                    <Button title="Register" onPress={handleRegister} />
+                </>
+            )}
         </View>
     );
 };

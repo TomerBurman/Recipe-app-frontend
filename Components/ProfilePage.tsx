@@ -11,7 +11,6 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
     useEffect(() => {
         const fetchData = () => {
             const user = route.params.user;
-            console.log(user);
             setData(user);
         };
         fetchData();

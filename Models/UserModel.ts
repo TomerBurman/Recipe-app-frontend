@@ -1,5 +1,6 @@
 import UserAPI from "../api/UserAPI";
 import { Recipe } from "./RecipeModel";
+import FormData from "form-data";
 
 export type User = {
     userId: string;
@@ -59,8 +60,6 @@ export const getAllPosts = async (user: {
     refreshToken: string;
 }): Promise<Recipe[]> => {
     try {
-        console.log(user.accessToken + " This is access token");
-        console.log(user.refreshToken + " This is refresh token");
         const response = await UserAPI.getAllPosts(user);
         // Check if response has data
         if (response && response.data) {
@@ -72,6 +71,30 @@ export const getAllPosts = async (user: {
     } catch (err) {
         console.log("Error fetching posts:", err);
         return [];
+    }
+};
+
+export const uploadImage = async (imageURI: string) => {
+    var body = new FormData();
+    body.append("file", { name: "name", type: "image/jpeg", uri: imageURI });
+    console.log(body);
+    try {
+        const res = await UserAPI.uploadImage(body);
+
+        if (!res.ok) {
+            console.log("save failed " + res.problem);
+            return "";
+        } else {
+            console.log("save passed");
+            if (res.data) {
+                const url: any = res.data;
+                console.log("got res" + url.url);
+                return url.url;
+            }
+        }
+    } catch (err) {
+        console.log("save failed " + err);
+        return "";
     }
 };
 

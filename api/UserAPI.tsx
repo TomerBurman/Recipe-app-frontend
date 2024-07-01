@@ -63,6 +63,13 @@ const createPost = async (
     return response;
 };
 
+const uploadImage = async (image: any) => {
+    console.log(image);
+    return apiClient.post("/file/file/", image, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+};
+
 const getAllPosts = async (user: {
     refreshToken: string;
     accessToken: string;
@@ -91,4 +98,5 @@ export default {
     createPost,
     getAllPosts,
     getUser,
+    uploadImage,
 };
