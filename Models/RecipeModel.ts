@@ -9,6 +9,7 @@ export type Recipe = {
     steps: string[];
     images: string[];
     ownerName: string;
+    savedUsers: string[];
 };
 
 // title: string;

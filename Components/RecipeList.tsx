@@ -1,16 +1,26 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import Post from "./PostRow";
-import { FlatList, StyleSheet, Text, Alert } from "react-native";
+import { FlatList, StyleSheet, Alert } from "react-native";
 import { Recipe } from "../Models/RecipeModel";
 
-const RecipeList: FC<{ route: any; navigation: any; data: Recipe[] }> = ({
-    route,
-    navigation,
-    data,
-}) => {
+const RecipeList: FC<{
+    route: any;
+    navigation: any;
+    data: Recipe[];
+    userId: string;
+}> = ({ route, navigation, data, userId }) => {
     const onItemSelected = (id: string) => {
-        Alert.alert("Item selected" + id);
+        const selectedItem = data.find((item) => item._id === id);
+        if (selectedItem) {
+            navigation.navigate("Post Details", {
+                post: selectedItem,
+                userId: userId,
+            });
+        } else {
+            Alert.alert("Item not found");
+        }
     };
+
     return (
         <FlatList
             style={styles.Flatlist}

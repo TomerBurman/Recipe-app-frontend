@@ -1,5 +1,7 @@
 import apiClient from "./client";
 import { Recipe } from "../Models/RecipeModel";
+import { User } from "../Models/UserModel";
+import { secureTokens, secureUserId } from "../utilities/secureStorage";
 
 const register = async (user: {
     email: string;
@@ -8,7 +10,6 @@ const register = async (user: {
     bio: string;
     image: string;
 }) => {
-    console.log("Registering with details: " + user.email);
     try {
         return apiClient.post<{
             email: string;
@@ -22,28 +23,43 @@ const register = async (user: {
         console.log(err);
     }
 };
+const login = async (user: { email: string; password: string }) => {
+    try {
+        const res = await apiClient.post<{
+            accessToken: string;
+            refreshToken: string;
+            name: string;
+            userId: string;
+            image: string;
+            bio: string;
+        }>("/auth/login", user);
+        if (res.data?.accessToken && res.data?.refreshToken) {
+            await secureTokens(res.data.accessToken, res.data.refreshToken);
+            await secureUserId(res.data.userId);
+            apiClient.setHeader(
+                "Authorization",
+                `Bearer ${res.data.accessToken}`
+            );
+            return res;
+        }
+        return res;
+    } catch (err) {
+        throw err;
+    }
+};
 
-const getUser = async (user: { userId: string; accessToken: string }) => {
-    apiClient.setHeader("Authorization", "Bearer " + user.accessToken);
-    const res = apiClient.get<{
+const savePost = async (post: Recipe) => {
+    return apiClient.put<{ post: Recipe }>("/post/", { post, _id: post._id });
+};
+const getUser = async (user: { userId: string }) => {
+    const res = await apiClient.get<{
         email: string;
         tokens: string[];
         image: string;
         bio: string;
-        id: string;
+        userId: string;
         name: string;
     }>("/user/" + user.userId);
-    return res;
-};
-const login = async (user: { email: string; password: string }) => {
-    const res = await apiClient.post<{
-        accessToken: string;
-        refreshToken: string;
-        name: string;
-        userId: string;
-        image: string;
-        bio: string;
-    }>("/auth/login", user);
     return res;
 };
 
@@ -58,13 +74,11 @@ const createPost = async (
         ownerName: string;
     }
 ) => {
-    apiClient.setHeader("Authorization", "Bearer " + user.accessToken);
     const response = await apiClient.post<{}>("/post/", { post, user });
     return response;
 };
 
 const uploadImage = async (image: any) => {
-    console.log(image);
     return apiClient.post("/file/file/", image, {
         headers: { "Content-Type": "multipart/form-data" },
     });
@@ -75,8 +89,6 @@ const getAllPosts = async (user: {
     accessToken: string;
 }): Promise<any> => {
     try {
-        console.log(user.accessToken, user.refreshToken);
-        apiClient.setHeader("Authorization", "Bearer " + user.accessToken);
         const response = await apiClient.get<{
             data: Recipe[];
         }>("/post");
@@ -99,4 +111,5 @@ export default {
     getAllPosts,
     getUser,
     uploadImage,
+    savePost,
 };

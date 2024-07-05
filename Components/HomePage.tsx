@@ -8,19 +8,37 @@ import {
     Button,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { User, setUser, getAllPosts } from "../Models/UserModel";
+import { User, setUser, getAllPosts, getUser } from "../Models/UserModel";
 import { Recipe } from "../Models/RecipeModel";
 import RecipeList from "./RecipeList";
+import * as SecureStorage from "../utilities/secureStorage";
+import { ActivityIndicator } from "./ActivityIndicator";
 
 const HomePage: FC<{ route: any; navigation: any }> = ({
     route,
     navigation,
 }) => {
     const [posts, setPosts] = useState<Recipe[] | null>(null);
+    const [regularPosts, setRegularPosts] = useState<Recipe[] | null>(null);
+    const [savedPosts, setSavedPosts] = useState<Recipe[] | null>(null);
     const [data, setData] = useState<User | null>(null);
+    const [userId, setUserId] = useState("");
+    const [loading, setLoading] = useState(true);
     const [selectedTab, setSelectedTab] = useState<string>("Explore");
-    const { name, userId, refreshToken, accessToken, email, image } =
-        route.params;
+    const { name, refreshToken, accessToken, email, image } = route.params;
+
+    const getUserId = useCallback(async () => {
+        setUserId(await SecureStorage.getUserId());
+        if (userId) {
+            try {
+                const response: any = await getUser({ userId });
+                const user = response.data;
+                setData(user);
+            } catch (e) {
+                console.log("There was an error getting users details", e);
+            }
+        }
+    }, [userId]); // if userId changes, useEffect will run again
 
     useEffect(() => {
         const initializeData = () => {
@@ -33,10 +51,15 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                 image,
             });
             setData(userData);
+            setLoading(false);
         };
-
-        initializeData();
-    }, [name, userId, refreshToken, accessToken, email, image]);
+        if (name && userId && refreshToken && accessToken && image && email) {
+            initializeData();
+        } else {
+            getUserId();
+            console.log(data, " This is data");
+        }
+    }, [name, userId, refreshToken, accessToken, email, image, getUserId]);
 
     const fetchPosts = useCallback(async () => {
         if (data?.tokens) {
@@ -46,6 +69,15 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                     accessToken: data.tokens[0],
                 });
                 setPosts(postsData);
+                console.log(data);
+                const filteredSavedPosts = postsData.filter((post) =>
+                    post.savedUsers.some((user) => user === data._id)
+                );
+                const filteredRegularPosts = postsData.filter(
+                    (post) => !filteredSavedPosts.includes(post)
+                );
+                setRegularPosts(filteredRegularPosts);
+                setSavedPosts(filteredSavedPosts);
             } catch (error) {
                 console.log("Error fetching posts: ", error);
             }
@@ -91,20 +123,28 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     }, [data, navigation]);
 
     if (!data || !posts) {
-        return <Text>Loading...</Text>;
+        return <ActivityIndicator visible={loading} />;
     }
 
     const renderContent = () => {
-        if (selectedTab === "Explore") {
+        if (selectedTab === "Explore" && userId && regularPosts) {
             return (
                 <RecipeList
+                    userId={userId}
                     route={route}
                     navigation={navigation}
-                    data={posts}
+                    data={regularPosts}
                 />
             );
-        } else {
-            return <Text>Here are the liked recipes...</Text>; // Replace with actual Liked Recipes component or content
+        } else if (userId && savedPosts) {
+            return (
+                <RecipeList
+                    userId={userId}
+                    route={route}
+                    navigation={navigation}
+                    data={savedPosts}
+                />
+            ); // Replace with actual Liked Recipes component or content
         }
     };
 
@@ -127,7 +167,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                     ]}
                     onPress={() => setSelectedTab("LikedRecipes")}
                 >
-                    <Text style={styles.buttonText}>Liked Recipes</Text>
+                    <Text style={styles.buttonText}>Saved recipes</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.contentContainer}>{renderContent()}</View>

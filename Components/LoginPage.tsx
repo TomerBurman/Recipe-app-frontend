@@ -1,4 +1,6 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
+import * as SecureStorage from "../utilities/secureStorage";
+import apiClient from "../api/client";
 import {
     View,
     TextInput,
@@ -18,6 +20,22 @@ const LoginPage: FC<{ navigation: any; route: any }> = ({
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+            try {
+                const token = await SecureStorage.getAccessToken();
+                const userId = await SecureStorage.getUserId();
+                console.log(userId);
+                if (token) {
+                    apiClient.setHeader("Authorization", `Bearer ${token}`);
+                    navigation.navigate("HomePage", { userId: userId });
+                }
+            } catch (e) {
+                console.error("Failed to load the token.");
+            }
+        };
+        checkLoginStatus();
+    }, []);
     const handleLogin = async () => {
         try {
             const response = await login({ email, password });

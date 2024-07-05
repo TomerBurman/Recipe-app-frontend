@@ -3,7 +3,7 @@ import { Recipe } from "./RecipeModel";
 import FormData from "form-data";
 
 export type User = {
-    userId: string;
+    _id: string;
     email: string;
     name: string;
     tokens: string[];
@@ -20,7 +20,7 @@ export const setUser = (user: {
     image: string;
 }): User => {
     const newUser: User = {
-        userId: user.userId,
+        _id: user.userId,
         email: user.email,
         name: user.name,
         tokens: [user.accessToken, user.refreshToken],
@@ -30,20 +30,22 @@ export const setUser = (user: {
     return newUser;
 };
 
-export const getUser = async (user: {
-    userId: string;
-    accessToken: string;
-}) => {
-    const res = UserAPI.getUser(user);
+export const getUser = async (user: { userId: string }) => {
+    const res = await UserAPI.getUser(user);
     return res;
 };
 
+export const savePost = async (post: Recipe) => {
+    const res = await UserAPI.savePost(post);
+    console.log(res.status);
+    return res;
+};
 export const login = async (user: { email: string; password: string }) => {
     let res = await UserAPI.login(user);
+    console.log(res);
     if (res.data?.userId) {
         const res2 = await getUser({
             userId: res.data.userId,
-            accessToken: res.data.accessToken,
         });
         if (res2.data) {
             const { image, bio } = res2.data;
@@ -77,7 +79,6 @@ export const getAllPosts = async (user: {
 export const uploadImage = async (imageURI: string) => {
     var body = new FormData();
     body.append("file", { name: "name", type: "image/jpeg", uri: imageURI });
-    console.log(body);
     try {
         const res = await UserAPI.uploadImage(body);
 
@@ -88,7 +89,6 @@ export const uploadImage = async (imageURI: string) => {
             console.log("save passed");
             if (res.data) {
                 const url: any = res.data;
-                console.log("got res" + url.url);
                 return url.url;
             }
         }
@@ -121,8 +121,18 @@ export const createPost = async (
     }
 ) => {
     const user = {
-        _id: connectedUser.userId,
+        _id: connectedUser._id,
         accessToken: connectedUser.tokens[0],
     };
     return await UserAPI.createPost(user, post);
+};
+
+export default {
+    createPost,
+    register,
+    uploadImage,
+    login,
+    setUser,
+    getAllPosts,
+    getUser,
 };

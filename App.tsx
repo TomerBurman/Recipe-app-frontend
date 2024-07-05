@@ -14,6 +14,7 @@ import RegistrationPage from "./Components/RegistrationPage";
 import HomePage from "./Components/HomePage";
 import LoginPage from "./Components/LoginPage";
 import CreatePost from "./Components/CreatePost";
+import PostDetails from "./Components/PostDetails";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
                 <Stack.Screen name="HomePage" component={HomePage} />
                 <Stack.Screen name="Profile" component={ProfilePage} />
                 <Stack.Screen name="New post" component={CreatePost} />
+                <Stack.Screen name="Post Details" component={PostDetails} />
 
                 <Stack.Screen
                     name="RegistrationPage"
