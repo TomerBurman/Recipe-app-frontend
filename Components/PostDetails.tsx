@@ -8,7 +8,7 @@ import {
     ScrollView,
 } from "react-native";
 import { Recipe } from "../Models/RecipeModel";
-import { savePost } from "../Models/UserModel";
+import UserModel from "../Models/UserModel";
 
 const PostDetails: FC<{
     route: any;
@@ -16,14 +16,15 @@ const PostDetails: FC<{
 }> = ({ route, navigation }) => {
     const { post, userId }: { post: Recipe; userId: string } = route.params;
     const isPostSaved = post.savedUsers.includes(userId);
+    const isUsersPost = post.owner === userId;
 
-    const handleDeletePost = async () => {
+    const handleUnSave = async () => {
         const updatedSavedUsers = post.savedUsers.filter((id) => id != userId);
         const updatedPost: Recipe = {
             ...post,
             savedUsers: updatedSavedUsers,
         };
-        const res = await savePost(updatedPost);
+        const res = await UserModel.savePost(updatedPost);
         navigation.goBack();
     };
     const handleSavePost = async () => {
@@ -31,8 +32,14 @@ const PostDetails: FC<{
             ...post,
             savedUsers: [...post.savedUsers, userId],
         };
-        const res = await savePost(updatedPost);
+        const res = await UserModel.savePost(updatedPost);
         navigation.goBack();
+    };
+
+    const handleEdit = async () => {
+        await navigation.navigate("Edit Post", {
+            post,
+        });
     };
 
     return (
@@ -79,10 +86,13 @@ const PostDetails: FC<{
             ) : (
                 <Text style={styles.step}>No steps available</Text>
             )}
-            <Button
-                title={isPostSaved ? "Unsave Post" : "Save Post"}
-                onPress={isPostSaved ? handleDeletePost : handleSavePost}
-            />
+            {isUsersPost && <Button title="Edit post" onPress={handleEdit} />}
+            {!isUsersPost && (
+                <Button
+                    title={isPostSaved ? "Unsave Post" : "Save Post"}
+                    onPress={isPostSaved ? handleUnSave : handleSavePost}
+                />
+            )}
         </ScrollView>
     );
 };

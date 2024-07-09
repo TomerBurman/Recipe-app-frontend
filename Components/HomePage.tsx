@@ -8,7 +8,7 @@ import {
     Button,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { User, setUser, getAllPosts, getUser } from "../Models/UserModel";
+import UserModel, { User } from "../Models/UserModel";
 import { Recipe } from "../Models/RecipeModel";
 import RecipeList from "./RecipeList";
 import * as SecureStorage from "../utilities/secureStorage";
@@ -21,17 +21,19 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     const [posts, setPosts] = useState<Recipe[] | null>(null);
     const [regularPosts, setRegularPosts] = useState<Recipe[] | null>(null);
     const [savedPosts, setSavedPosts] = useState<Recipe[] | null>(null);
+    const [myPosts, setMyPosts] = useState<Recipe[] | null>(null);
     const [data, setData] = useState<User | null>(null);
     const [userId, setUserId] = useState("");
     const [loading, setLoading] = useState(true);
     const [selectedTab, setSelectedTab] = useState<string>("Explore");
+
     const { name, refreshToken, accessToken, email, image } = route.params;
 
     const getUserId = useCallback(async () => {
         setUserId(await SecureStorage.getUserId());
         if (userId) {
             try {
-                const response: any = await getUser({ userId });
+                const response: any = await UserModel.getUser({ userId });
                 const user = response.data;
                 setData(user);
             } catch (e) {
@@ -42,7 +44,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
 
     useEffect(() => {
         const initializeData = () => {
-            const userData = setUser({
+            const userData = UserModel.setUser({
                 name,
                 userId,
                 refreshToken,
@@ -57,25 +59,30 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
             initializeData();
         } else {
             getUserId();
-            console.log(data, " This is data");
         }
     }, [name, userId, refreshToken, accessToken, email, image, getUserId]);
 
     const fetchPosts = useCallback(async () => {
         if (data?.tokens) {
             try {
-                const postsData: Recipe[] = await getAllPosts({
+                const postsData: Recipe[] = await UserModel.getAllPosts({
                     refreshToken: data.tokens[1],
                     accessToken: data.tokens[0],
                 });
                 setPosts(postsData);
-                console.log(data);
                 const filteredSavedPosts = postsData.filter((post) =>
                     post.savedUsers.some((user) => user === data._id)
                 );
-                const filteredRegularPosts = postsData.filter(
-                    (post) => !filteredSavedPosts.includes(post)
+
+                const filteredMyPosts = postsData.filter(
+                    (post) => post.owner === data._id
                 );
+                const filteredRegularPosts = postsData.filter(
+                    (post) =>
+                        !filteredSavedPosts.includes(post) &&
+                        !filteredMyPosts.includes(post)
+                );
+                setMyPosts(filteredMyPosts);
                 setRegularPosts(filteredRegularPosts);
                 setSavedPosts(filteredSavedPosts);
             } catch (error) {
@@ -102,6 +109,12 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                         {data?.image && (
                             <Image
                                 source={{ uri: data.image }}
+                                style={styles.navProfileImage}
+                            />
+                        )}
+                        {!data?.image && (
+                            <Image
+                                source={require("../assets/icon.png")}
                                 style={styles.navProfileImage}
                             />
                         )}
@@ -136,13 +149,22 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                     data={regularPosts}
                 />
             );
-        } else if (userId && savedPosts) {
+        } else if (selectedTab === "SavedRecipes" && userId && savedPosts) {
             return (
                 <RecipeList
                     userId={userId}
                     route={route}
                     navigation={navigation}
                     data={savedPosts}
+                />
+            ); // Replace with actual Liked Recipes component or content
+        } else if (selectedTab === "MyRecipes" && userId && myPosts) {
+            return (
+                <RecipeList
+                    userId={userId}
+                    route={route}
+                    navigation={navigation}
+                    data={myPosts}
                 />
             ); // Replace with actual Liked Recipes component or content
         }
@@ -163,11 +185,20 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                 <TouchableOpacity
                     style={[
                         styles.button,
-                        selectedTab === "LikedRecipes" && styles.selectedButton,
+                        selectedTab === "SavedRecipes" && styles.selectedButton,
                     ]}
-                    onPress={() => setSelectedTab("LikedRecipes")}
+                    onPress={() => setSelectedTab("SavedRecipes")}
                 >
                     <Text style={styles.buttonText}>Saved recipes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        selectedTab === "MyRecipes" && styles.selectedButton,
+                    ]}
+                    onPress={() => setSelectedTab("MyRecipes")}
+                >
+                    <Text style={styles.buttonText}>My recipes</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.contentContainer}>{renderContent()}</View>

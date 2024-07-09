@@ -15,6 +15,7 @@ import HomePage from "./Components/HomePage";
 import LoginPage from "./Components/LoginPage";
 import CreatePost from "./Components/CreatePost";
 import PostDetails from "./Components/PostDetails";
+import EditPost from "./Components/EditPost";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -26,7 +27,7 @@ export default function App() {
                 <Stack.Screen name="Profile" component={ProfilePage} />
                 <Stack.Screen name="New post" component={CreatePost} />
                 <Stack.Screen name="Post Details" component={PostDetails} />
-
+                <Stack.Screen name="Edit Post" component={EditPost} />
                 <Stack.Screen
                     name="RegistrationPage"
                     component={RegistrationPage}

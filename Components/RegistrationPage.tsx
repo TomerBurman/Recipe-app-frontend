@@ -9,11 +9,9 @@ import {
     Image,
     TouchableOpacity,
 } from "react-native";
-import UserAPI from "../api/UserAPI";
-import { User, register } from "../Models/UserModel";
 import * as ImagePicker from "expo-image-picker";
 import { AntDesign } from "@expo/vector-icons";
-import { login, uploadImage } from "../Models/UserModel";
+import UserModel from "../Models/UserModel";
 import { ActivityIndicator } from "./ActivityIndicator";
 
 const RegistrationPage: FC<{ navigation: any; route: any }> = ({
@@ -64,41 +62,66 @@ const RegistrationPage: FC<{ navigation: any; route: any }> = ({
             console.log("ask permission error " + err);
         }
     };
+
+    const validateEmail = (email: string) => {
+        const re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    };
+
+    const validatePassword = (password: string) => {
+        return password.length >= 8;
+    };
+
     const handleRegister = async () => {
+        if (!validateEmail(email)) {
+            Alert.alert("Invalid email format");
+            return;
+        }
+        if (!validatePassword(password)) {
+            Alert.alert("Password must be at least 8 characters long");
+            return;
+        }
+
         setLoading(true);
         try {
             if (image != "") {
-                const url = await uploadImage(image);
+                const url = await UserModel.uploadImage(image);
                 setImage(url);
-            }
-            const res = await register({ email, password, name, bio, image });
-            if (res && res.status == 200) {
-                try {
-                    const res2 = await login({ email, password });
-                    if (res2.ok && res2.data) {
-                        const { accessToken, refreshToken, name, userId } =
-                            res2.data;
-                        setTokens([accessToken, refreshToken]);
-                        navigation.navigate("HomePage", {
-                            name,
-                            userId,
-                            bio,
-                            email,
-                            accessToken: res2.data.accessToken,
-                            refreshToken: res2.data.refreshToken,
-                            image: image,
-                        });
+                const res = await UserModel.register({
+                    email,
+                    password,
+                    name,
+                    bio,
+                    image: url,
+                });
+                if (res && res.status == 200) {
+                    try {
+                        const res2 = await UserModel.login({ email, password });
+                        if (res2.ok && res2.data) {
+                            const { accessToken, refreshToken, name, userId } =
+                                res2.data;
+                            setTokens([accessToken, refreshToken]);
+                            navigation.navigate("HomePage", {
+                                name,
+                                userId,
+                                bio,
+                                email,
+                                accessToken: res2.data.accessToken,
+                                refreshToken: res2.data.refreshToken,
+                                image: image,
+                            });
+                        }
+                    } catch (err) {
+                        Alert.alert("Error logging in");
                     }
-                } catch (err) {
-                    Alert.alert("Error logging in");
+                } else {
+                    Alert.alert("Error registering, please try again");
                 }
-            } else {
-                Alert.alert("Error registering, please try again");
             }
         } catch (err) {
             Alert.alert("Error registering, make sure all fields are valid");
         } finally {
-            setLoading(false); // Hide activity indicator
+            setLoading(false);
         }
     };
 

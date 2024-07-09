@@ -11,7 +11,7 @@ export type User = {
     image: string;
 };
 
-export const setUser = (user: {
+const setUser = (user: {
     name: string;
     email: string;
     userId: string;
@@ -30,17 +30,17 @@ export const setUser = (user: {
     return newUser;
 };
 
-export const getUser = async (user: { userId: string }) => {
+const getUser = async (user: { userId: string }) => {
     const res = await UserAPI.getUser(user);
     return res;
 };
 
-export const savePost = async (post: Recipe) => {
+const savePost = async (post: Recipe) => {
     const res = await UserAPI.savePost(post);
     console.log(res.status);
     return res;
 };
-export const login = async (user: { email: string; password: string }) => {
+const login = async (user: { email: string; password: string }) => {
     let res = await UserAPI.login(user);
     console.log(res);
     if (res.data?.userId) {
@@ -57,7 +57,7 @@ export const login = async (user: { email: string; password: string }) => {
     return res;
 };
 
-export const getAllPosts = async (user: {
+const getAllPosts = async (user: {
     accessToken: string;
     refreshToken: string;
 }): Promise<Recipe[]> => {
@@ -76,7 +76,7 @@ export const getAllPosts = async (user: {
     }
 };
 
-export const uploadImage = async (imageURI: string) => {
+const uploadImage = async (imageURI: string) => {
     var body = new FormData();
     body.append("file", { name: "name", type: "image/jpeg", uri: imageURI });
     try {
@@ -98,18 +98,20 @@ export const uploadImage = async (imageURI: string) => {
     }
 };
 
-export const register = async (user: {
+const register = async (user: {
     email: string;
     password: string;
     name: string;
     bio: string;
     image: string;
 }) => {
+    console.log(user.image);
     const res = await UserAPI.register(user);
+
     return res;
 };
 
-export const createPost = async (
+const createPost = async (
     connectedUser: User,
     post: {
         title: string;
@@ -135,4 +137,5 @@ export default {
     setUser,
     getAllPosts,
     getUser,
+    savePost,
 };

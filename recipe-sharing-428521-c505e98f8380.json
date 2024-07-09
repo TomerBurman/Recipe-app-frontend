@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "recipe-sharing-428521",
+  "private_key_id": "c505e98f838063b2438ece5abba39083fbd86121",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDoRAhQVbYTsvaQ\nK1a7WDGCCXrDozoFIix1JS/4kkO9wvXoS/vcb+DiA8s+bni3vCTcyrgqg9Rre/H+\n74YMJjdC5PeP3NObVw8hAlU7hh0k1vMTFt0Yh5ujbPl/V6FvDrGo7NVGx/MIdlDF\nrruOfDov5ypfC7i53pVwFKrPVOvTsYBTjdpPIG05Ad4wvYhZ5wT/PafPhnySHRRn\nffajoEKPsvE5YbvgbTSqALviDT71I7tPjfGnK9UAZtJHNBPMeXqzQiUNvCA37AKo\n318rPFPtIuSKTN9zRiwqW+Zd8skkPct6BlsC3OxSgT8JwD5x6avTEuGeovFXz9F/\nX1zm8isHAgMBAAECggEAB51uEFmJtgJLZyqklfvW6QaFNIjTdtD0rYU3RL+24i/U\nKXY5nwk5UZpXkt0YWXMdBPLN2vGmMz1FuoVWhcDIVbR1ZrgSD/5otpJXAl6WnLCX\nbkF0+kA9RWcQlFuRJWJRR302+N0cBg5VqPAzogDx/266yuby0CqQsl4Fw5/AeO5B\njSrA1JztYhjPQNGp4iATMXht/7ZNb6fE4t8O+zK2866+BTAgnGiZ/hNJbre3vRla\nYe9sD78eXs7bV68wPrq2LQ8j6DiFJg2zHbyJWqYgbXWKdsqeAebKc9kGKO93rovv\nY4f9tmS/aBgBo9TpOzfK3GrHdKxw0NiXIYfOEnmocQKBgQD5Y3WXLkelOER/3ElM\nwuyBQ8al6em9zBf0H27PPznr5rC+SJeC4OFOJwRwF075O8qg38F+B121zmBZfn3y\nBvhNE2vaUKKDo7j0L+WgkPhJ17TpC6Gxp1bkNrMlIPkJU2eRVRM2u6UM9PCbb0hz\nKkvkn/k06sRc55wk5phvwzsl4wKBgQDubF1x/NCZu4i0ea0t36lCp5K2Q3YqKqwF\nhFo7YLPsQd3bGa2m8ZTUAOMYo5tE6W5zuGuMbP0hRPEquF1/WUmg+5Ro1si/nkPq\nPZqeDeWg+Atrh5hCTpRzj8y8PS3H/srgX6RwKqX8LWvlJtU8IhVPPJhhEmcFO7DH\nHJjnoCIPjQKBgQDHDE9KvzGH+YUS2GvYzKuf8MyYmD5rsn5b5sq2t6wvUQ04kw/6\n8ipiClpMbQ4nd0WfaXgycwakmXfldkRn7JA6VIn80eckUoTIwYHxykOiDHzklNgV\nx45e0BnkRJEAlIVRRinzwYlW8hkotoWJBfVVISnyxn67+FB0U2jPq2+GKQKBgQDc\n+MpSjwG2ubylp+/9iEGTaUPscPHfetUb9+K5DZMz8IfyPQZYp6ZMJtZTS67oW4Dm\n95GWAJ1KbF8oPN9K3DIFZaXS1N4R2lkPjDD1M+QTIFFVQ8K2EaY8xJX4EKuRpG/b\nLEl3O8/CvUY2h5sxtFUTrxF7Rlb83qmkoLiGVD+9MQKBgQC5RyBt0ZQwpd6MYVG0\nA+aL2lY76Si4qmYAwOihC/DmYz5HgwuPatyPTbqjFjXuNcPGNu642+6+OG2GH116\nN1BybQg3z7IHuq7gNjwyZNwGZq/AmOUd/WJrLdrLQ9CitmvcRf2gwx5aqyiMhrLB\nYi8+zFL8YgTdvR3kZR7mxeYQ3w==\n-----END PRIVATE KEY-----\n",
+  "client_email": "tomerburman@recipe-sharing-428521.iam.gserviceaccount.com",
+  "client_id": "112916755597032735986",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tomerburman%40recipe-sharing-428521.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

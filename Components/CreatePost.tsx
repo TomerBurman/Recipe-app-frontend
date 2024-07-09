@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import { createPost, User, uploadImage } from "../Models/UserModel"; // Import uploadImage
+import UserModel, { User } from "../Models/UserModel"; // Import uploadImage
 
 const CreatePost: FC<{ route: any; navigation: any }> = ({
     route,
@@ -70,7 +70,7 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
     const handleCreatePost = async () => {
         const uploadedImages = await Promise.all(
             images.map(async (imageURI) => {
-                const url = await uploadImage(imageURI);
+                const url = await UserModel.uploadImage(imageURI);
                 return url;
             })
         );
@@ -87,7 +87,7 @@ const CreatePost: FC<{ route: any; navigation: any }> = ({
         };
 
         try {
-            const res = await createPost(user, post);
+            const res = await UserModel.createPost(user, post);
             if (res && res.status === 201) {
                 Alert.alert("Post created successfully");
                 navigation.goBack(); // Navigate back to the previous screen

@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
 } from "react-native";
 import UserAPI from "../api/UserAPI";
-import { login } from "../Models/UserModel";
+import UserModel from "../Models/UserModel";
 
 const LoginPage: FC<{ navigation: any; route: any }> = ({
     navigation,
@@ -38,7 +38,7 @@ const LoginPage: FC<{ navigation: any; route: any }> = ({
     }, []);
     const handleLogin = async () => {
         try {
-            const response = await login({ email, password });
+            const response = await UserModel.login({ email, password });
             if (response.ok && response.data) {
                 const { accessToken, refreshToken, name, userId, image, bio } =
                     response.data;
