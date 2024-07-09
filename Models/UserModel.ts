@@ -57,6 +57,11 @@ const login = async (user: { email: string; password: string }) => {
     return res;
 };
 
+const updateUser = async (user: User) => {
+    const res = await UserAPI.updateUser(user);
+    return res;
+};
+
 const getAllPosts = async (user: {
     accessToken: string;
     refreshToken: string;
@@ -129,6 +134,15 @@ const createPost = async (
     return await UserAPI.createPost(user, post);
 };
 
+const updatePassword = async (user: User, password: string) => {
+    console.log(user, password, "This is passwrod change ");
+    UserAPI.updatePassword(user, password);
+};
+
+const deletePost = async (post: Recipe) => {
+    UserAPI.deletePost(post._id);
+};
+
 export default {
     createPost,
     register,
@@ -138,4 +152,7 @@ export default {
     getAllPosts,
     getUser,
     savePost,
+    updateUser,
+    updatePassword,
+    deletePost,
 };

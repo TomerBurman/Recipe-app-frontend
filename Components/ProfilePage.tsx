@@ -7,9 +7,11 @@ import {
     TouchableOpacity,
     TextInput,
     Alert,
+    Modal,
+    Button,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { User } from "../Models/UserModel";
+import UserModel, { User } from "../Models/UserModel";
 
 const ProfilePage: FC<{ route: any; navigation: any }> = ({
     route,
@@ -20,6 +22,8 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
     const [tempUser, setTempUser] = useState<Partial<User>>({});
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchData = () => {
@@ -40,11 +44,10 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
         const updatedUser = { ...user, [field]: tempUser[field] };
         setUser(updatedUser);
         setEditField(null);
-
-        // Implement logic to save updated field
-        // Example: Update data source or API call
-        // await saveUser(updatedUser);
+        const res = await UserModel.updateUser(updatedUser);
+        console.log(res.data);
         Alert.alert("Update", `${field} updated successfully.`);
+        navigation.navigate("HomePage", { updatedUser });
     };
 
     const handlePickImage = async () => {
@@ -71,27 +74,45 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
             result.assets.length > 0 &&
             user
         ) {
-            const updatedUser = { ...user, image: result.assets[0].uri };
-            setUser(updatedUser);
-            setTempUser({ ...tempUser, image: result.assets[0].uri });
-
-            // Implement logic to save updated image
-            // await saveUser(updatedUser);
-            Alert.alert("Update", `Profile image updated successfully.`);
+            try {
+                console.log(result.assets[0].uri, "This is the uri");
+                const image = await UserModel.uploadImage(result.assets[0].uri);
+                if (image) {
+                    const updatedUser = { ...user, image: image };
+                    setUser(updatedUser);
+                    setTempUser({ ...tempUser, image: image });
+                    await UserModel.updateUser(updatedUser);
+                    navigation.navigate("HomePage", { updatedUser });
+                    // Implement logic to save updated image
+                    // await saveUser(updatedUser);
+                    Alert.alert(
+                        "Update",
+                        `Profile image updated successfully.`
+                    );
+                } else {
+                    Alert.alert("There was a network error. Please try again");
+                }
+            } catch (err: any) {
+                Alert.alert(err.message);
+            }
         }
     };
 
-    const handleChangePassword = () => {
+    const handleChangePassword = async () => {
         if (password !== confirmPassword) {
             Alert.alert("Error", "Passwords do not match.");
             return;
         }
-
+        if (user) {
+            await UserModel.updatePassword(user, password);
+        }
         // Implement logic to change the password
         // Example: Update data source or API call
-        // await changePassword(user.email, password);
+        // await changePassword(user.email, currentPassword, password);
         setPassword("");
         setConfirmPassword("");
+        setCurrentPassword("");
+        setModalVisible(false);
         Alert.alert("Update", "Password updated successfully.");
     };
 
@@ -178,24 +199,63 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
             )}
 
             {/* Change Password */}
-            <Text style={styles.sectionTitle}>Change Password</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="New Password"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Confirm New Password"
-                secureTextEntry
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-            />
-            <TouchableOpacity onPress={handleChangePassword}>
-                <Text style={styles.saveButton}>Save Password</Text>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <Text style={styles.changePasswordText}>Change Password</Text>
             </TouchableOpacity>
+
+            {/* Modal for changing password */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalTitle}>Change Password</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="Current Password"
+                            secureTextEntry
+                            value={currentPassword}
+                            onChangeText={setCurrentPassword}
+                        />
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="New Password"
+                            secureTextEntry
+                            value={password}
+                            onChangeText={setPassword}
+                        />
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="Confirm New Password"
+                            secureTextEntry
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.saveButtonContainer}
+                            onPress={handleChangePassword}
+                        >
+                            <Text style={styles.saveButtonText}>
+                                Save Password
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.saveButtonContainer,
+                                styles.cancelButtonContainer,
+                            ]}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Text style={styles.saveButtonText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -227,12 +287,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
         textAlign: "center",
     },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginTop: 20,
-        marginBottom: 10,
-    },
     editContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -253,6 +307,61 @@ const styles = StyleSheet.create({
     saveButton: {
         color: "blue",
         fontSize: 18,
+    },
+    changePasswordText: {
+        color: "blue",
+        fontSize: 18,
+        marginTop: 20,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalView: {
+        width: "80%",
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 20,
+    },
+    modalInput: {
+        width: "100%",
+        height: 40,
+        borderColor: "gray",
+        borderWidth: 1,
+        paddingHorizontal: 10,
+        marginBottom: 10,
+    },
+    saveButtonContainer: {
+        backgroundColor: "blue",
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+        width: "100%",
+        alignItems: "center",
+    },
+    saveButtonText: {
+        color: "white",
+        fontSize: 16,
+    },
+    cancelButtonContainer: {
+        backgroundColor: "red",
+        marginTop: 10,
     },
 });
 

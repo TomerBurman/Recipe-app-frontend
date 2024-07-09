@@ -6,6 +6,7 @@ import {
     Button,
     StyleSheet,
     ScrollView,
+    Alert,
 } from "react-native";
 import { Recipe } from "../Models/RecipeModel";
 import UserModel from "../Models/UserModel";
@@ -27,6 +28,7 @@ const PostDetails: FC<{
         const res = await UserModel.savePost(updatedPost);
         navigation.goBack();
     };
+
     const handleSavePost = async () => {
         const updatedPost: Recipe = {
             ...post,
@@ -40,6 +42,28 @@ const PostDetails: FC<{
         await navigation.navigate("Edit Post", {
             post,
         });
+    };
+
+    const handleDelete = async () => {
+        Alert.alert(
+            "Confirm Delete",
+            "Are you sure you want to delete this post?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Post deletion canceled"),
+                    style: "cancel",
+                },
+                {
+                    text: "OK",
+                    onPress: async () => {
+                        await UserModel.deletePost(post);
+                        navigation.goBack();
+                    },
+                },
+            ],
+            { cancelable: false }
+        );
     };
 
     return (
@@ -87,6 +111,9 @@ const PostDetails: FC<{
                 <Text style={styles.step}>No steps available</Text>
             )}
             {isUsersPost && <Button title="Edit post" onPress={handleEdit} />}
+            {isUsersPost && (
+                <Button title="Delete post" onPress={handleDelete} />
+            )}
             {!isUsersPost && (
                 <Button
                     title={isPostSaved ? "Unsave Post" : "Save Post"}

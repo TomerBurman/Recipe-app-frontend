@@ -49,6 +49,7 @@ const login = async (user: { email: string; password: string }) => {
 };
 
 const savePost = async (post: Recipe) => {
+    console.log(post);
     return apiClient.put<{ post: Recipe }>("/post/", { post, _id: post._id });
 };
 const getUser = async (user: { userId: string }) => {
@@ -84,6 +85,20 @@ const uploadImage = async (image: any) => {
     });
 };
 
+const updateUser = async (user: User) => {
+    console.log(user);
+    return apiClient.put<{ user: User }>(`/user/`, {
+        connectedUser: user,
+    });
+};
+const updatePassword = async (user: User, password: string) => {
+    console.log(user, password, "This is password change");
+    return apiClient.put<{ user: User }>("/user/", {
+        connectedUser: user,
+        password,
+    });
+};
+
 const getAllPosts = async (user: {
     refreshToken: string;
     accessToken: string;
@@ -104,6 +119,10 @@ const getAllPosts = async (user: {
     }
 };
 
+const deletePost = async (postId: string) => {
+    return apiClient.delete("/post/" + postId);
+};
+
 export default {
     register,
     login,
@@ -112,4 +131,7 @@ export default {
     getUser,
     uploadImage,
     savePost,
+    updateUser,
+    updatePassword,
+    deletePost,
 };

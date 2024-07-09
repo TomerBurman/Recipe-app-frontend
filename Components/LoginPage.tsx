@@ -34,7 +34,7 @@ const LoginPage: FC<{ navigation: any; route: any }> = ({
                 console.error("Failed to load the token.");
             }
         };
-        checkLoginStatus();
+        //checkLoginStatus();
     }, []);
     const handleLogin = async () => {
         try {

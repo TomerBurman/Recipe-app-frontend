@@ -30,17 +30,20 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     const { name, refreshToken, accessToken, email, image } = route.params;
 
     const getUserId = useCallback(async () => {
-        setUserId(await SecureStorage.getUserId());
-        if (userId) {
+        const storedUserId = await SecureStorage.getUserId();
+        setUserId(storedUserId);
+        if (storedUserId) {
             try {
-                const response: any = await UserModel.getUser({ userId });
+                const response: any = await UserModel.getUser({
+                    userId: storedUserId,
+                });
                 const user = response.data;
                 setData(user);
             } catch (e) {
-                console.log("There was an error getting users details", e);
+                console.log("There was an error getting user's details", e);
             }
         }
-    }, [userId]); // if userId changes, useEffect will run again
+    }, []); // Only run once
 
     useEffect(() => {
         const initializeData = () => {
@@ -94,7 +97,10 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     useFocusEffect(
         useCallback(() => {
             fetchPosts();
-        }, [fetchPosts])
+            if (route.params?.updatedUser) {
+                setData(route.params.updatedUser);
+            }
+        }, [fetchPosts, route.params?.updatedUser])
     );
 
     useEffect(() => {
