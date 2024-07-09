@@ -33,3 +33,8 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+
+# google
+
+recipe-sharing-428521-c505e98f8380.json
