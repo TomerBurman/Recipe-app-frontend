@@ -37,12 +37,10 @@ const getUser = async (user: { userId: string }) => {
 
 const savePost = async (post: Recipe) => {
     const res = await UserAPI.savePost(post);
-    console.log(res.status);
     return res;
 };
 const login = async (user: { email: string; password: string }) => {
     let res = await UserAPI.login(user);
-    console.log(res);
     if (res.data?.userId) {
         const res2 = await getUser({
             userId: res.data.userId,
@@ -59,6 +57,7 @@ const login = async (user: { email: string; password: string }) => {
 
 const updateUser = async (user: User) => {
     const res = await UserAPI.updateUser(user);
+
     return res;
 };
 
@@ -110,7 +109,6 @@ const register = async (user: {
     bio: string;
     image: string;
 }) => {
-    console.log(user.image);
     const res = await UserAPI.register(user);
 
     return res;
@@ -134,13 +132,16 @@ const createPost = async (
     return await UserAPI.createPost(user, post);
 };
 
-const updatePassword = async (user: User, password: string) => {
-    console.log(user, password, "This is passwrod change ");
-    UserAPI.updatePassword(user, password);
+const updatePassword = async (
+    user: User,
+    password: string,
+    currentPassword: string
+) => {
+    return await UserAPI.updatePassword(user, password, currentPassword);
 };
 
 const deletePost = async (post: Recipe) => {
-    UserAPI.deletePost(post._id);
+    await UserAPI.deletePost(post._id);
 };
 
 export default {

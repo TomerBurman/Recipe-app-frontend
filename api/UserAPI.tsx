@@ -80,23 +80,28 @@ const createPost = async (
 };
 
 const uploadImage = async (image: any) => {
-    return apiClient.post("/file/file/", image, {
+    return await apiClient.post("/file/file/", image, {
         headers: { "Content-Type": "multipart/form-data" },
     });
 };
 
 const updateUser = async (user: User) => {
     console.log(user);
-    return apiClient.put<{ user: User }>(`/user/`, {
+    return await apiClient.put<{ user: User }>(`/user/`, {
         connectedUser: user,
     });
 };
-const updatePassword = async (user: User, password: string) => {
-    console.log(user, password, "This is password change");
-    return apiClient.put<{ user: User }>("/user/", {
+const updatePassword = async (
+    user: User,
+    password: string,
+    currentPassword: string
+) => {
+    const res = await apiClient.put<{ user: User }>("/user/", {
         connectedUser: user,
         password,
+        currentPassword,
     });
+    return res;
 };
 
 const getAllPosts = async (user: {

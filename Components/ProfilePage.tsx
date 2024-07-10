@@ -45,7 +45,6 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
         setUser(updatedUser);
         setEditField(null);
         const res = await UserModel.updateUser(updatedUser);
-        console.log(res.data);
         Alert.alert("Update", `${field} updated successfully.`);
         navigation.navigate("HomePage", { updatedUser });
     };
@@ -75,7 +74,6 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
             user
         ) {
             try {
-                console.log(result.assets[0].uri, "This is the uri");
                 const image = await UserModel.uploadImage(result.assets[0].uri);
                 if (image) {
                     const updatedUser = { ...user, image: image };
@@ -104,11 +102,20 @@ const ProfilePage: FC<{ route: any; navigation: any }> = ({
             return;
         }
         if (user) {
-            await UserModel.updatePassword(user, password);
+            const res = await UserModel.updatePassword(
+                user,
+                password,
+                currentPassword
+            );
+            if (res && res.status === 401) {
+                Alert.alert("Incorrect password, please try again.");
+                return;
+            }
         }
         // Implement logic to change the password
         // Example: Update data source or API call
         // await changePassword(user.email, currentPassword, password);
+
         setPassword("");
         setConfirmPassword("");
         setCurrentPassword("");
