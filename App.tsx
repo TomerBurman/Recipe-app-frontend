@@ -1,12 +1,6 @@
-import {
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    TextInput,
-    StatusBar,
-} from "react-native";
-import React, { useState } from "react";
+// App.tsx
+import React, { useState, useEffect } from "react";
+import { StyleSheet, StatusBar, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProfilePage from "./Components/ProfilePage";
@@ -16,9 +10,24 @@ import LoginPage from "./Components/LoginPage";
 import CreatePost from "./Components/CreatePost";
 import PostDetails from "./Components/PostDetails";
 import EditPost from "./Components/EditPost";
+import SplashScreen from "./Components/splashScreen";
 
 const Stack = createNativeStackNavigator();
+
 export default function App() {
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Simulate a loading process (e.g., fetching resources, initializing app)
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 3000); // Adjust the timeout duration as needed
+    }, []);
+
+    if (isLoading) {
+        return <SplashScreen />;
+    }
+
     return (
         <NavigationContainer>
             <Stack.Navigator>

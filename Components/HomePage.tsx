@@ -30,6 +30,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
     const { name, refreshToken, accessToken, email, image } = route.params;
 
     const getUserId = useCallback(async () => {
+        setLoading(true); // Set loading state before fetching user ID
         const storedUserId = await SecureStorage.getUserId();
         setUserId(storedUserId);
         if (storedUserId) {
@@ -43,7 +44,8 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
                 console.log("There was an error getting user's details", e);
             }
         }
-    }, []); // Only run once
+        setLoading(false); // Set loading state to false after fetching user ID
+    }, []);
 
     useEffect(() => {
         const initializeData = () => {
@@ -67,6 +69,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
 
     const fetchPosts = useCallback(async () => {
         if (data?.tokens) {
+            setLoading(true); // Set loading state before fetching posts
             try {
                 const postsData: Recipe[] = await UserModel.getAllPosts({
                     refreshToken: data.tokens[1],
@@ -91,6 +94,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
             } catch (error) {
                 console.log("Error fetching posts: ", error);
             }
+            setLoading(false); // Set loading state to false after fetching posts
         }
     }, [data]);
 
@@ -141,7 +145,7 @@ const HomePage: FC<{ route: any; navigation: any }> = ({
         });
     }, [data, navigation]);
 
-    if (!data || !posts) {
+    if (loading) {
         return <ActivityIndicator visible={loading} />;
     }
 

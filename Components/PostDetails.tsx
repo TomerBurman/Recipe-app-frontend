@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -9,7 +9,7 @@ import {
     Alert,
 } from "react-native";
 import { Recipe } from "../Models/RecipeModel";
-import UserModel from "../Models/UserModel";
+import UserModel, { User } from "../Models/UserModel";
 
 const PostDetails: FC<{
     route: any;
@@ -18,6 +18,24 @@ const PostDetails: FC<{
     const { post, userId }: { post: Recipe; userId: string } = route.params;
     const isPostSaved = post.savedUsers.includes(userId);
     const isUsersPost = post.owner === userId;
+    const [owner, setOwner] = useState<User | null>(null);
+
+    useEffect(() => {
+        const fetchOwnerDetails = async () => {
+            try {
+                const response: any = await UserModel.getUser({
+                    userId: post.owner,
+                });
+                if (response.data) {
+                    setOwner(response.data);
+                }
+            } catch (error) {
+                console.log("Error fetching owner details:", error);
+            }
+        };
+
+        fetchOwnerDetails();
+    }, [post.owner]);
 
     const handleUnSave = async () => {
         const updatedSavedUsers = post.savedUsers.filter((id) => id != userId);
@@ -25,7 +43,7 @@ const PostDetails: FC<{
             ...post,
             savedUsers: updatedSavedUsers,
         };
-        const res = await UserModel.savePost(updatedPost);
+        await UserModel.savePost(updatedPost);
         navigation.goBack();
     };
 
@@ -34,7 +52,7 @@ const PostDetails: FC<{
             ...post,
             savedUsers: [...post.savedUsers, userId],
         };
-        const res = await UserModel.savePost(updatedPost);
+        await UserModel.savePost(updatedPost);
         navigation.goBack();
     };
 
@@ -67,67 +85,87 @@ const PostDetails: FC<{
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>{post.title}</Text>
-            <Text style={styles.owner}>By {post.ownerName}</Text>
-            <View style={styles.imageContainer}>
-                {Array.isArray(post.images) && post.images.length > 0 ? (
-                    post.images.map((uri, index) => (
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <Text style={styles.title}>{post.title}</Text>
+                {owner && (
+                    <>
+                        <Text style={styles.owner}>By {owner.name}</Text>
                         <Image
-                            key={index}
-                            source={{ uri }}
+                            source={{ uri: owner.image }}
+                            style={styles.ownerImage}
+                        />
+                    </>
+                )}
+                <View style={styles.imageContainer}>
+                    {Array.isArray(post.images) && post.images.length > 0 ? (
+                        post.images.map((uri, index) => (
+                            <Image
+                                key={index}
+                                source={{ uri }}
+                                style={styles.image}
+                            />
+                        ))
+                    ) : (
+                        <Image
+                            source={{
+                                uri: "https://i.vimeocdn.com/portrait/58832_300x300.jpg",
+                            }}
                             style={styles.image}
                         />
+                    )}
+                </View>
+                <Text style={styles.descriptionHeader}>Description</Text>
+                <Text style={styles.description}>{post.description}</Text>
+                <Text style={styles.sectionTitle}>Ingredients:</Text>
+                {Array.isArray(post.ingredients) &&
+                post.ingredients.length > 0 ? (
+                    post.ingredients.map((ingredient, index) => (
+                        <Text key={index} style={styles.ingredient}>
+                            {ingredient}
+                        </Text>
                     ))
                 ) : (
-                    <Image
-                        source={{
-                            uri: "https://i.vimeocdn.com/portrait/58832_300x300.jpg",
-                        }}
-                        style={styles.image}
+                    <Text style={styles.ingredient}>
+                        No ingredients available
+                    </Text>
+                )}
+                <Text style={styles.sectionTitle}>Steps:</Text>
+                {Array.isArray(post.steps) && post.steps.length > 0 ? (
+                    post.steps.map((step, index) => (
+                        <Text key={index} style={styles.step}>
+                            {index + 1}. {step}
+                        </Text>
+                    ))
+                ) : (
+                    <Text style={styles.step}>No steps available</Text>
+                )}
+            </ScrollView>
+            <View style={styles.buttonContainer}>
+                {isUsersPost && (
+                    <>
+                        <Button title="Edit post" onPress={handleEdit} />
+                        <Button title="Delete post" onPress={handleDelete} />
+                    </>
+                )}
+                {!isUsersPost && (
+                    <Button
+                        title={isPostSaved ? "Unsave Post" : "Save Post"}
+                        onPress={isPostSaved ? handleUnSave : handleSavePost}
                     />
                 )}
             </View>
-            <Text style={styles.descriptionHeader}>Description</Text>
-            <Text style={styles.description}>{post.description}</Text>
-            <Text style={styles.sectionTitle}>Ingredients:</Text>
-            {Array.isArray(post.ingredients) && post.ingredients.length > 0 ? (
-                post.ingredients.map((ingredient, index) => (
-                    <Text key={index} style={styles.ingredient}>
-                        {ingredient}
-                    </Text>
-                ))
-            ) : (
-                <Text style={styles.ingredient}>No ingredients available</Text>
-            )}
-            <Text style={styles.sectionTitle}>Steps:</Text>
-            {Array.isArray(post.steps) && post.steps.length > 0 ? (
-                post.steps.map((step, index) => (
-                    <Text key={index} style={styles.step}>
-                        {index + 1}. {step}
-                    </Text>
-                ))
-            ) : (
-                <Text style={styles.step}>No steps available</Text>
-            )}
-            {isUsersPost && <Button title="Edit post" onPress={handleEdit} />}
-            {isUsersPost && (
-                <Button title="Delete post" onPress={handleDelete} />
-            )}
-            {!isUsersPost && (
-                <Button
-                    title={isPostSaved ? "Unsave Post" : "Save Post"}
-                    onPress={isPostSaved ? handleUnSave : handleSavePost}
-                />
-            )}
-        </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    scrollContent: {
         padding: 20,
+        paddingBottom: 100, // Ensure content does not overlap with buttons
     },
     title: {
         fontSize: 24,
@@ -137,6 +175,12 @@ const styles = StyleSheet.create({
     owner: {
         fontSize: 18,
         fontWeight: "bold",
+        marginBottom: 10,
+    },
+    ownerImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         marginBottom: 20,
     },
     imageContainer: {
@@ -172,6 +216,17 @@ const styles = StyleSheet.create({
     step: {
         fontSize: 16,
         marginBottom: 10,
+    },
+    buttonContainer: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        backgroundColor: "#fff",
+        paddingVertical: 10,
+        borderTopWidth: 1,
+        borderTopColor: "#ccc",
     },
 });
 
